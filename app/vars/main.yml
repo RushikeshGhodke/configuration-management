@@ -1,0 +1,5 @@
+---
+# vars file for app
+deploy_method: "github"
+github_repo: "https://github.com/rushikeshghodke/ansible-website.git"
+github_branch: "main"

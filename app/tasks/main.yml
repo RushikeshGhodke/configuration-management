@@ -1,0 +1,59 @@
+---
+# Install git
+- name: Install git
+  apt:
+    name: git
+    state: present
+
+# Tarball deployment method
+- name: Deploy from tarball
+  block:
+    - name: Ensure web root exists
+      file:
+        path: /var/www/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Upload website tarball to server
+      copy:
+        src: "files/website.tar.gz"
+        dest: "/tmp/website.tar.gz"
+    
+    - name: Unzip website tarball
+      unarchive:
+        src: "/tmp/website.tar.gz"
+        dest: "/var/www/html/"
+        remote_src: yes
+  when: deploy_method == "tarball"
+
+# GitHub deployment method
+- name: Deploy from GitHub
+  block:
+    - name: Remove old website directory completely
+      file:
+        path: /var/www/html
+        state: absent
+    
+    - name: Create fresh website directory
+      file:
+        path: /var/www/html
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    
+    - name: Clone website from GitHub
+      command: git clone {{ github_repo }} /var/www/html
+      args:
+        creates: /var/www/html/.git
+  when: deploy_method == "github"
+
+# Set proper permissions (for both methods)
+- name: Set ownership of website files
+  file:
+    path: /var/www/html
+    owner: www-data
+    group: www-data
+    recurse: yes
