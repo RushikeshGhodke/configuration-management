@@ -1,0 +1,14 @@
+---
+# tasks file for ssh
+- name: Ensure .ssh directory exists
+  file:
+    path: "/home/{{ ansible_user }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ ansible_user }}"
+
+- name: Add SSH public key to server
+  authorized_key:
+    user: "{{ ansible_user }}"
+    state: present
+    key: "{{ lookup('file', '/home/rushi/.ssh/id_rsa.pub') }}"
